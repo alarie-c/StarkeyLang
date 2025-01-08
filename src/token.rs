@@ -16,8 +16,10 @@ pub(crate) enum TokenKind {
     Slash,
     Equal,
     EqualEqual,
+
     Ident(String),
     Number(String),
+    String(String),
 
     Const,
     EOF,
