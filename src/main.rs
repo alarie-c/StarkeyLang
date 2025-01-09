@@ -13,7 +13,7 @@ fn main() {
 
     let mut scanner = Scanner::new(&src);
     while let Some(t) = scanner.scan_next() {
-        dbg!(&t);
+        println!("{t}");
         if t.kind == TokenKind::EOF {
             break;
         }
