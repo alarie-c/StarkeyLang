@@ -89,7 +89,7 @@ pub(crate) enum TokenKind {
     DoubleMinus,
     MinusEqual,
     StarEqual,
-    
+
     // Comparison operators
     Equal,
     DoubleEqual,
@@ -118,7 +118,6 @@ pub(crate) enum TokenKind {
     Ident(String),
     Number(String),
     String(String),
-
 
     // Keywords
     Const,

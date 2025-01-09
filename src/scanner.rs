@@ -70,7 +70,7 @@ impl Scanner {
                         Some(self.token(TokenKind::Arrow))
                     } else if self.assert_next('-') {
                         Some(self.token(TokenKind::DoubleMinus))
-                    }  else if self.assert_next('=') {
+                    } else if self.assert_next('=') {
                         Some(self.token(TokenKind::MinusEqual))
                     } else {
                         Some(self.token(TokenKind::Minus))
