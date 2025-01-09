@@ -30,9 +30,90 @@ impl Scanner {
             return match self.current {
                 '(' => Some(self.token(TokenKind::ParOpen)),
                 ')' => Some(self.token(TokenKind::ParClose)),
+                '{' => Some(self.token(TokenKind::CurlOpen)),
+                '}' => Some(self.token(TokenKind::CurlClose)),
+                '[' => Some(self.token(TokenKind::BracOpen)),
+                ']' => Some(self.token(TokenKind::BracClose)),
+                ';' => Some(self.token(TokenKind::Semicolon)),
+                '^' => Some(self.token(TokenKind::Caret)),
+                '%' => Some(self.token(TokenKind::Modulo)),
+                ',' => Some(self.token(TokenKind::Comma)),
+                '$' => Some(self.token(TokenKind::Dollar)),
+                '#' => Some(self.token(TokenKind::Hash)),
+                '@' => Some(self.token(TokenKind::At)),
+                '?' => Some(self.token(TokenKind::Question)),
+                '&' => {
+                    if self.assert_next('&') {
+                        Some(self.token(TokenKind::DoubleAmp))
+                    } else {
+                        Some(self.token(TokenKind::Amp))
+                    }
+                }
+                '|' => {
+                    if self.assert_next('|') {
+                        Some(self.token(TokenKind::DoubleBar))
+                    } else {
+                        Some(self.token(TokenKind::Bar))
+                    }
+                }
+                '+' => {
+                    if self.assert_next('+') {
+                        Some(self.token(TokenKind::DoublePlus))
+                    } else if self.assert_next('=') {
+                        Some(self.token(TokenKind::PlusEqual))
+                    } else {
+                        Some(self.token(TokenKind::Plus))
+                    }
+                }
+                '-' => {
+                    if self.assert_next('>') {
+                        Some(self.token(TokenKind::Arrow))
+                    } else if self.assert_next('-') {
+                        Some(self.token(TokenKind::DoubleMinus))
+                    }  else if self.assert_next('=') {
+                        Some(self.token(TokenKind::MinusEqual))
+                    } else {
+                        Some(self.token(TokenKind::Minus))
+                    }
+                }
+                '*' => {
+                    if self.assert_next('=') {
+                        Some(self.token(TokenKind::StarEqual))
+                    } else {
+                        Some(self.token(TokenKind::Star))
+                    }
+                }
+                '/' => {
+                    if self.assert_next('/') {
+                        Some(self.token(TokenKind::DoubleSlash))
+                    } else {
+                        Some(self.token(TokenKind::Slash))
+                    }
+                }
+                '<' => {
+                    if self.assert_next('=') {
+                        Some(self.token(TokenKind::LessThanEqual))
+                    } else {
+                        Some(self.token(TokenKind::LessThan))
+                    }
+                }
+                '>' => {
+                    if self.assert_next('=') {
+                        Some(self.token(TokenKind::MoreThanEqual))
+                    } else {
+                        Some(self.token(TokenKind::MoreThan))
+                    }
+                }
+                '!' => {
+                    if self.assert_next('=') {
+                        Some(self.token(TokenKind::BangEqual))
+                    } else {
+                        Some(self.token(TokenKind::Bang))
+                    }
+                }
                 '=' => {
                     if self.assert_next('=') {
-                        Some(self.token(TokenKind::EqualEqual))
+                        Some(self.token(TokenKind::DoubleEqual))
                     } else {
                         Some(self.token(TokenKind::Equal))
                     }
@@ -78,6 +159,17 @@ impl Scanner {
     fn match_keywords(&mut self, stream: String) -> Token {
         match stream.as_str() {
             "const" => self.token(TokenKind::Const),
+            "if" => self.token(TokenKind::If),
+            "then" => self.token(TokenKind::Then),
+            "else" => self.token(TokenKind::Else),
+            "elif" => self.token(TokenKind::Elif),
+            "while" => self.token(TokenKind::While),
+            "do" => self.token(TokenKind::Do),
+            "for" => self.token(TokenKind::For),
+            "function" => self.token(TokenKind::Function),
+            "end" => self.token(TokenKind::End),
+            "continue" => self.token(TokenKind::Continue),
+            "break" => self.token(TokenKind::Break),
             _ => self.token(TokenKind::Ident(stream)),
         }
     }
