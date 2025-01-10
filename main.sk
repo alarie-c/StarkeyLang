@@ -1,8 +1,1 @@
-function main() -> int
-    float x = 3.14
-    $ x;
-
-    x -> 51.6;
-
-    return int(x);
-end
+3 + 4 * (2 - 1)

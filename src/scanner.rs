@@ -4,6 +4,7 @@ use crate::token::{Token, TokenKind};
 
 const WHITESPACE: &'static str = " \r\n\t";
 
+#[derive(Debug)]
 pub(crate) struct Scanner {
     stream: VecDeque<char>,
     current: char,

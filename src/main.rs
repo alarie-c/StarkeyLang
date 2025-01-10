@@ -24,4 +24,5 @@ fn main() {
 
     let mut parser = Parser::new(&src);
     parser.parse();
+    dbg!(&parser);
 }

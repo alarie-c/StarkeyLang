@@ -2,6 +2,7 @@ use std::ops::Range;
 
 use crate::token::TokenKind;
 
+#[derive(Debug)]
 pub(crate) struct AbstractSyntaxTree(Vec<Node>);
 
 impl AbstractSyntaxTree {
@@ -14,11 +15,13 @@ impl AbstractSyntaxTree {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct Node {
     pub expr: Expr,
     pub span: Range<usize>,
 }
 
+#[derive(Debug)]
 pub(crate) enum Expr {
     Symbol {
         name: String,
@@ -29,9 +32,9 @@ pub(crate) enum Expr {
     Operator {
         op: Operator,
     },
-    AccessMember {
-        lhs: Box<Expr>,
-        rhs: Box<Expr>,
+    IndexInto {
+        item: Box<Expr>,
+        index: Box<Expr>,
     },
     BinaryExpr {
         lhs: Box<Expr>,
@@ -43,40 +46,52 @@ pub(crate) enum Expr {
     },
 }
 
+#[derive(Debug)]
 pub(crate) struct Operator {
-    op_kind: OperatorKind,
-    assoc: Associativity,
-    precedence: u8,
+    pub op_kind: OperatorKind,
+    pub assoc: Associativity,
+    pub precedence: u8,
 }
 
 impl Operator {
     pub(crate) fn fromtk(tk: &TokenKind) -> Option<Self> {
         match tk {
+            TokenKind::ParOpen => Some(Operator {
+                op_kind: OperatorKind::ParOpen,
+                assoc: Associativity::Right,
+                precedence: 255,
+            }),
+            TokenKind::ParClose => Some(Operator {
+                op_kind: OperatorKind::ParClose,
+                assoc: Associativity::Left,
+                precedence: 255,
+            }),
             TokenKind::Plus => Some(Operator {
                 op_kind: OperatorKind::Plus,
                 assoc: Associativity::Left,
-                precedence: 3,
+                precedence: 2,
             }),
             TokenKind::Minus => Some(Operator {
                 op_kind: OperatorKind::Minus,
                 assoc: Associativity::Left,
-                precedence: 3,
+                precedence: 2,
             }),
             TokenKind::Star => Some(Operator {
                 op_kind: OperatorKind::Multiply,
                 assoc: Associativity::Left,
-                precedence: 2,
+                precedence: 3,
             }),
             TokenKind::Slash => Some(Operator {
                 op_kind: OperatorKind::Divide,
                 assoc: Associativity::Left,
-                precedence: 2,
+                precedence: 3,
             }),
             _ => None,
         }
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub(crate) enum OperatorKind {
     Plus,
     Minus,
@@ -84,8 +99,11 @@ pub(crate) enum OperatorKind {
     Multiply,
     Exponent,
     Modulo,
+    ParOpen,
+    ParClose,
 }
 
+#[derive(Debug)]
 pub(crate) enum Associativity {
     Left,
     Right,
