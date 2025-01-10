@@ -55,6 +55,8 @@ impl Parser {
     }
 
     fn parse_expr(&mut self) {
+        dbg!(&self);
+        
         if let Some(tk) = self.scanner.scan_next() {
             match tk.kind {
                 TokenKind::Dot => self.parse_dot(),
@@ -67,12 +69,16 @@ impl Parser {
     }
 
     fn parse_dot(&mut self) {
+        println!("Indexing into");
         let lhs = self.stack.pop().unwrap_or_else(|| {
             panic!("Expected an LHS expression for MemberAccess expression!");
         });
         let rhs = self.parse_and_get().unwrap_or_else(|| {
             panic!("Expected an RHS expression for MemberAccess expression!");
         });
+
+        dbg!(&lhs);
+        dbg!(&rhs);
 
         // Push the IndexInto EXPR to the stack
         self.stack.push(Expr::IndexInto {
@@ -135,10 +141,8 @@ impl Parser {
 
     fn drain_until_paropen(&mut self) {
         loop {
-            dbg!(&self.holding_stack);
             if let Some(op) = self.holding_stack.pop() {
                 if op.op_kind == OperatorKind::ParOpen {
-                    eprintln!("( found");
                     break;
                 } else {
                     self.stack.push(Expr::Operator { op });
@@ -152,7 +156,7 @@ impl Parser {
     /// Calls `parse_expr()` and returns the last thing added to the stack, if it exists
     /// Will return none if self.parse() does not parse anything or if the stack is empty
     fn parse_and_get(&mut self) -> Option<Expr> {
-        self.parse();
+        self.parse_expr();
         self.stack.pop()
     }
 
