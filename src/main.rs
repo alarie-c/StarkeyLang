@@ -1,6 +1,6 @@
 use std::fs;
 
-use parser::Parser;
+use parser::{ParseError, Parser};
 use scanner::Scanner;
 use token::TokenKind;
 

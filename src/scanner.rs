@@ -42,6 +42,7 @@ impl Scanner {
                 '#' => Some(self.token(TokenKind::Hash)),
                 '@' => Some(self.token(TokenKind::At)),
                 '?' => Some(self.token(TokenKind::Question)),
+                '.' => Some(self.token(TokenKind::Dot)),
                 '&' => {
                     if self.assert_next('&') {
                         Some(self.token(TokenKind::DoubleAmp))
