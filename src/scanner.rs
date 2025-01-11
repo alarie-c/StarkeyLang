@@ -50,6 +50,7 @@ impl Scanner {
                 '[' => Some(self.token(TokenKind::BracOpen)),
                 ']' => Some(self.token(TokenKind::BracClose)),
                 ';' => Some(self.token(TokenKind::Semicolon)),
+                ':' => Some(self.token(TokenKind::Colon)),
                 '^' => Some(self.token(TokenKind::Caret)),
                 '%' => Some(self.token(TokenKind::Modulo)),
                 ',' => Some(self.token(TokenKind::Comma)),

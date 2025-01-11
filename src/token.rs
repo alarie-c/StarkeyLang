@@ -45,6 +45,7 @@ impl Display for Token {
             TokenKind::Hash => write!(f, "{}: HASH '#'", span),
             TokenKind::Dollar => write!(f, "{}: DOLLAR '%'", span),
             TokenKind::Semicolon => write!(f, "{}: SEMICOLON ';'", span),
+            TokenKind::Colon => write!(f, "{}: COLON ':'", span),
             TokenKind::Question => write!(f, "{}: QUESTION '?'", span),
             TokenKind::Comma => write!(f, "{}: COMMA ','", span),
             TokenKind::Dot => write!(f, "{}: DOT '.'", span),
@@ -115,6 +116,7 @@ pub(crate) enum TokenKind {
     Question,
     Comma,
     Dot,
+    Colon,
 
     // Literals
     Ident(String),

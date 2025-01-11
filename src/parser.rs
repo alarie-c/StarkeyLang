@@ -93,6 +93,22 @@ impl Parser {
                     });
                     return; // early return
                 }
+                TokenKind::Colon => {
+                    // Consume the colon
+                    let _ = self.next();
+
+                    // Parse and get the type
+                    let stype = self.parse_and_get().unwrap_or_else(|| {
+                        panic!("Dot found, expected a valid symbol to index into this symobl");
+                    });
+
+                    // Push this to the stack
+                    self.push(Expr::TypedSymbol {
+                        stype: Box::new(stype),
+                        sname: Box::new(item),
+                    });
+                    return; // early return
+                }
                 _ => {}
             }
         }

@@ -27,6 +27,10 @@ pub(crate) struct Node {
 
 #[derive(Debug)]
 pub(crate) enum Expr {
+    TypedSymbol {
+        stype: Box<Expr>,
+        sname: Box<Expr>,
+    },
     Symbol {
         name: String,
     },
@@ -90,6 +94,11 @@ impl Operator {
                 assoc: Associativity::Left,
                 precedence: 3,
             }),
+            TokenKind::Equal => Some(Operator {
+                op_kind: OperatorKind::Assignment,
+                assoc: Associativity::Right,
+                precedence: 0,
+            }),
             _ => None,
         }
     }
@@ -105,6 +114,7 @@ pub(crate) enum OperatorKind {
     Modulo,
     ParOpen,
     ParClose,
+    Assignment,
 }
 
 #[derive(Debug)]
