@@ -17,6 +17,10 @@ impl AbstractSyntaxTree {
     pub(crate) fn pull_node(&mut self) -> Option<Node> {
         self.0.pop()
     }
+
+    pub(crate) fn last_node(&mut self) -> Option<&Node> {
+        self.0.last()
+    }
 }
 
 #[derive(Debug)]
@@ -49,6 +53,15 @@ pub(crate) enum Expr {
         rhs: Box<Expr>,
         op: Operator,
     },
+    FunctionSignature {
+        fsymbol: Box<Expr>,
+        fparams: Box<Expr>,
+        freturn: Option<Box<Expr>>,
+    },
+    Parameters {
+        params: Vec<Box<Expr>>,
+    },
+
     EndOfFile {
         code: i32,
     },

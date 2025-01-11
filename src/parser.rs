@@ -54,13 +54,80 @@ impl Parser {
 
     fn parse_expr(&mut self) {
         if let Some(tk) = self.next() {
+            println!("PARSING: ");
+            dbg!(&tk);
             match tk.kind {
+                TokenKind::Function => self.parse_function_signature(),
+
                 TokenKind::Ident(s) => self.parse_symbol(s),
                 TokenKind::Number(s) => self.parse_number(s),
                 TokenKind::EOF => self.end(),
+                TokenKind::Comma => self.parse_expr(),
                 _ => self.parse_op(&tk.kind),
             }
         }
+    }
+
+    fn parse_parameters(&mut self) {
+        println!("current:");
+        dbg!(&self);
+
+        let mut params: Vec<Box<Expr>> = vec![];
+        loop {
+            // Check to see if the next thing is a close par
+            if self.peek().is_some_and(|tk| tk.kind == TokenKind::ParClose) {
+                self.next(); // consume that ^
+                break;
+            }
+
+            self.parse_expr();
+            match self.last() {
+                Some(n) => match n.expr {
+                    Expr::TypedSymbol { stype: _, sname: _ } => unsafe {
+                        params.push(Box::new(self.pop().unwrap_unchecked()));
+                    },
+                    _ => break,
+                },
+                None => panic!("Expected function parameters after function name definintion"),
+            }
+        }
+        self.push(Expr::Parameters { params });
+    }
+
+    fn parse_function_signature(&mut self) {
+        // Get the name of the function
+        let fsymbol = self
+            .parse_and_get()
+            .unwrap_or_else(|| panic!("Expected a valid symbol for function signature"));
+
+        // Expect the next thing to be a open parenthesis
+        if !self.peek().is_some_and(|tk| tk.kind == TokenKind::ParOpen) {
+            panic!("Expected '(' after function symbol definition");
+        }
+        self.next(); // consume that ^
+        self.parse_parameters();
+
+        // Take parameters off the stack
+        // unsafe unwrap because parse_params will always push a params node, even if it's empty
+        let fparams = unsafe { self.pop().unwrap_unchecked() };
+
+        // Expect the next thing to be a colon
+        let mut freturn: Option<Box<Expr>> = None;
+        if self.peek().is_some_and(|tk| tk.kind == TokenKind::Colon) {
+            self.next(); // consume that ^
+            freturn = Some(Box::new(self.parse_and_get().unwrap_or_else(|| {
+                panic!("Expected valid symobl after function return definition");
+            })));
+        }
+
+        // Assemble the function signature and push it to the AST
+        self.push(Expr::FunctionSignature {
+            fsymbol: Box::new(fsymbol),
+            fparams: Box::new(fparams),
+            freturn,
+        });
+
+        // TODO: Parse the function body here I guess
     }
 
     fn parse_op(&mut self, tk: &TokenKind) {
@@ -193,6 +260,10 @@ impl Parser {
             }
             None => None,
         }
+    }
+
+    fn last(&mut self) -> Option<&Node> {
+        self.tree.last_node()
     }
 
     fn peek(&mut self) -> Option<&Token> {
