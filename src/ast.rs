@@ -10,8 +10,12 @@ impl AbstractSyntaxTree {
         Self(vec![])
     }
 
-    pub(crate) fn push(&mut self, node: Node) {
+    pub(crate) fn push_node(&mut self, node: Node) {
         self.0.push(node);
+    }
+
+    pub(crate) fn pull_node(&mut self) -> Option<Node> {
+        self.0.pop()
     }
 }
 
@@ -54,7 +58,7 @@ pub(crate) struct Operator {
 }
 
 impl Operator {
-    pub(crate) fn fromtk(tk: &TokenKind) -> Option<Self> {
+    pub(crate) fn from_token(tk: &TokenKind) -> Option<Self> {
         match tk {
             TokenKind::ParOpen => Some(Operator {
                 op_kind: OperatorKind::ParOpen,

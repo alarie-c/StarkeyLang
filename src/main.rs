@@ -14,15 +14,14 @@ const SOURCE_PATH: &str = "main.sk";
 fn main() {
     let src = fs::read_to_string(SOURCE_PATH).expect("Error reading source file");
 
-    // let mut scanner = Scanner::new(&src);
-    // while let Some(t) = scanner.scan_next() {
-    //     println!("{t}");
-    //     if t.kind == TokenKind::EOF {
-    //         break;
-    //     }
-    // }
+    // Construct the scanner and tokenize the source file
+    let mut scanner = Scanner::new(&src);
+    let mut tokens = scanner.scan();
+    tokens.reverse();
+    println!("{tokens:?}");
 
-    let mut parser = Parser::new(&src);
+    // Construct the parser and feed it the tokens from the scanner
+    let mut parser = Parser::new(tokens);
     parser.parse();
     dbg!(&parser);
 }

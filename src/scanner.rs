@@ -20,7 +20,21 @@ impl Scanner {
         }
     }
 
-    pub(crate) fn scan_next(&mut self) -> Option<Token> {
+    pub(crate) fn scan(&mut self) -> Vec<Token> {
+        let mut output: Vec<Token> = vec![];
+        while !self.stream.is_empty() {
+            match self.scan_next() {
+                Some(token) => output.push(token),
+                None => panic!("Something went wrong while tokenizing"),
+            }
+        }
+        if output.last().is_some_and(|t| t.kind != TokenKind::EOF) {
+            output.push(self.token(TokenKind::EOF));
+        }
+        return output;
+    }
+
+    fn scan_next(&mut self) -> Option<Token> {
         if self.next() {
             while WHITESPACE.contains(self.current) {
                 if !self.next() {
