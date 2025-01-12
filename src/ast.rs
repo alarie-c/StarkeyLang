@@ -2,35 +2,59 @@ use std::ops::Range;
 
 use crate::token::TokenKind;
 
+// #[derive(Debug)]
+// pub(crate) struct AbstractSyntaxTree(Vec<Node>);
+
+// impl AbstractSyntaxTree {
+//     pub(crate) fn new() -> Self {
+//         Self(vec![])
+//     }
+
+//     pub(crate) fn push_node(&mut self, node: Node) {
+//         self.0.push(node);
+//     }
+
+//     pub(crate) fn pull_node(&mut self) -> Option<Node> {
+//         self.0.pop()
+//     }
+
+//     pub(crate) fn last_node(&mut self) -> Option<&Node> {
+//         self.0.last()
+//     }
+// }
+
 #[derive(Debug)]
-pub(crate) struct AbstractSyntaxTree(Vec<Node>);
-
-impl AbstractSyntaxTree {
-    pub(crate) fn new() -> Self {
-        Self(vec![])
-    }
-
-    pub(crate) fn push_node(&mut self, node: Node) {
-        self.0.push(node);
-    }
-
-    pub(crate) fn pull_node(&mut self) -> Option<Node> {
-        self.0.pop()
-    }
-
-    pub(crate) fn last_node(&mut self) -> Option<&Node> {
-        self.0.last()
-    }
-}
-
-#[derive(Debug)]
-pub(crate) struct Node {
-    pub expr: Expr,
+pub(crate) struct Decl {
+    pub kind: DeclKind,
     pub span: Range<usize>,
 }
 
 #[derive(Debug)]
-pub(crate) enum Expr {
+pub(crate) struct Stmt {
+    pub kind: StmtKind,
+    pub span: Range<usize>,
+}
+
+#[derive(Debug)]
+pub(crate) struct Expr {
+    pub kind: ExprKind,
+    pub span: Range<usize>,
+}
+
+
+#[derive(Debug)]
+pub(crate) enum DeclKind {
+    FunctionDecl { signature: Expr, body: Vec<Expr> },
+}
+
+#[derive(Debug)]
+pub(crate) enum StmtKind {
+    Assignment { symbol: Expr, value: Expr },
+    FunctionCall { symbol: Expr, args: Expr },
+}
+
+#[derive(Debug)]
+pub(crate) enum ExprKind {
     TypedSymbol {
         stype: Box<Expr>,
         sname: Box<Expr>,
@@ -61,7 +85,7 @@ pub(crate) enum Expr {
     Parameters {
         params: Vec<Box<Expr>>,
     },
-
+    MarkerEnd,
     EndOfFile {
         code: i32,
     },

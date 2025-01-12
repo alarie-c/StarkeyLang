@@ -22,6 +22,6 @@ fn main() {
 
     // Construct the parser and feed it the tokens from the scanner
     let mut parser = Parser::new(tokens);
-    parser.parse();
+    parser.parse_expressions();
     dbg!(&parser);
 }

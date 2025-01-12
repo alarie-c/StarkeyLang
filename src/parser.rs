@@ -1,8 +1,7 @@
-use std::{f32::consts::E, fmt::Display, ops::Range};
+use std::{fmt::Display, ops::Range};
 
 use crate::{
-    ast::{AbstractSyntaxTree, Expr, Node, Operator, OperatorKind},
-    scanner::Scanner,
+    ast::{Expr, ExprKind, Operator, OperatorKind},
     token::{Token, TokenKind},
 };
 
@@ -27,10 +26,10 @@ pub(crate) struct Parser {
 
     /// This is effectively the holding
     /// stack for operators
-    stack: Vec<Operator>,
+    op_stack: Vec<Operator>,
 
     /// This is the output for the Parser
-    tree: AbstractSyntaxTree,
+    expr_stack: Vec<Expr>,
 }
 
 impl Parser {
@@ -39,12 +38,12 @@ impl Parser {
             errors: vec![],
             span: 0..0,
             stream: tokens,
-            stack: vec![],
-            tree: AbstractSyntaxTree::new(),
+            op_stack: vec![],
+            expr_stack: vec![],
         }
     }
 
-    pub(crate) fn parse(&mut self) {
+    pub(crate) fn parse_expressions(&mut self) {
         dbg!(&self);
 
         while !self.stream.is_empty() {
@@ -58,7 +57,7 @@ impl Parser {
             dbg!(&tk);
             match tk.kind {
                 TokenKind::Function => self.parse_function_signature(),
-
+                TokenKind::End => self.parse_marker(ExprKind::MarkerEnd),
                 TokenKind::Ident(s) => self.parse_symbol(s),
                 TokenKind::Number(s) => self.parse_number(s),
                 TokenKind::EOF => self.end(),
@@ -82,8 +81,8 @@ impl Parser {
 
             self.parse_expr();
             match self.last() {
-                Some(n) => match n.expr {
-                    Expr::TypedSymbol { stype: _, sname: _ } => unsafe {
+                Some(e) => match e.kind {
+                    ExprKind::TypedSymbol { stype: _, sname: _ } => unsafe {
                         params.push(Box::new(self.pop().unwrap_unchecked()));
                     },
                     _ => break,
@@ -91,7 +90,8 @@ impl Parser {
                 None => panic!("Expected function parameters after function name definintion"),
             }
         }
-        self.push(Expr::Parameters { params });
+        let expr = self.expr(ExprKind::Parameters { params });
+        self.push(expr);
     }
 
     fn parse_function_signature(&mut self) {
@@ -121,13 +121,12 @@ impl Parser {
         }
 
         // Assemble the function signature and push it to the AST
-        self.push(Expr::FunctionSignature {
+        let expr = self.expr(ExprKind::FunctionSignature {
             fsymbol: Box::new(fsymbol),
             fparams: Box::new(fparams),
             freturn,
         });
-
-        // TODO: Parse the function body here I guess
+        self.push(expr);
     }
 
     fn parse_op(&mut self, tk: &TokenKind) {
@@ -138,7 +137,7 @@ impl Parser {
     }
 
     fn parse_symbol(&mut self, s: String) {
-        let item = Expr::Symbol { name: s };
+        let item = self.expr(ExprKind::Symbol { name: s });
 
         // We already have the symbol name, s, and it's token has been
         // consumed. We want to check to make sure this symbol isn't being indexed into
@@ -154,10 +153,11 @@ impl Parser {
                     });
 
                     // Push this to the stack
-                    self.push(Expr::IndexInto {
+                    let expr = self.expr(ExprKind::IndexInto {
                         item: Box::new(item),
                         index: Box::new(index),
                     });
+                    self.push(expr);
                     return; // early return
                 }
                 TokenKind::Colon => {
@@ -170,10 +170,11 @@ impl Parser {
                     });
 
                     // Push this to the stack
-                    self.push(Expr::TypedSymbol {
+                    let expr = self.expr(ExprKind::TypedSymbol {
                         stype: Box::new(stype),
                         sname: Box::new(item),
                     });
+                    self.push(expr);
                     return; // early return
                 }
                 _ => {}
@@ -184,9 +185,17 @@ impl Parser {
 
     fn parse_number(&mut self, n: String) {
         match n.parse::<f64>() {
-            Ok(v) => self.push(Expr::Number { value: v }),
+            Ok(v) => {
+                let expr = self.expr(ExprKind::Number { value: v });
+                self.push(expr);
+            }
             Err(_) => panic!("Error parsing number!"),
         }
+    }
+
+    fn parse_marker(&mut self, marker: ExprKind) {
+        let expr = self.expr(marker);
+        self.push(expr);
     }
 
     /// Calls `parse_expr()` and returns the last thing added to the stack, if it exists
@@ -199,7 +208,7 @@ impl Parser {
     fn push_op(&mut self, newop: Operator) {
         match newop.op_kind {
             OperatorKind::ParOpen => {
-                self.stack.push(newop);
+                self.op_stack.push(newop);
                 return; // early return
             }
             OperatorKind::ParClose => {
@@ -209,16 +218,17 @@ impl Parser {
             _ => {}
         }
 
-        match self.stack.last() {
+        match self.op_stack.last() {
             Some(op) => {
                 // If newop has a lower precendence than most recent stack op
                 if newop.precedence < op.precedence && op.op_kind != OperatorKind::ParOpen {
                     // Pop the current operator and push it to the AST
-                    let op = unsafe { self.stack.pop().unwrap_unchecked() };
-                    self.push(Expr::Operator { op });
+                    let op = unsafe { self.op_stack.pop().unwrap_unchecked() };
+                    let expr = self.expr(ExprKind::Operator { op });
+                    self.push(expr);
 
                     // Put the new op on the holding stack
-                    self.stack.push(newop);
+                    self.op_stack.push(newop);
                     return; // early return
                 }
             }
@@ -226,16 +236,17 @@ impl Parser {
         }
 
         // Put the new op on the holding stack
-        self.stack.push(newop);
+        self.op_stack.push(newop);
     }
 
     fn drain_paren_group(&mut self) {
         loop {
-            if let Some(op) = self.stack.pop() {
+            if let Some(op) = self.op_stack.pop() {
                 if op.op_kind == OperatorKind::ParOpen {
                     break;
                 } else {
-                    self.push(Expr::Operator { op });
+                    let expr: Expr = self.expr(ExprKind::Operator { op });
+                    self.push(expr);
                     continue;
                 }
             }
@@ -243,27 +254,31 @@ impl Parser {
         }
     }
 
+    fn expr(&mut self, kind: ExprKind) -> Expr {
+        Expr {
+            kind,
+            span: self.span.clone(),
+        }
+    }
+
     /// Converts the given EXPR to a node
     /// and pushes it to the AST
     fn push(&mut self, expr: Expr) {
-        self.tree.push_node(Node {
-            expr,
-            span: self.span.clone(),
-        });
+        self.expr_stack.push(expr);
     }
 
     fn pop(&mut self) -> Option<Expr> {
-        match self.tree.pull_node() {
-            Some(n) => {
-                self.span.start = n.span.start;
-                return Some(n.expr);
+        match self.expr_stack.pop() {
+            Some(e) => {
+                self.span.start = e.span.start;
+                return Some(e);
             }
             None => None,
         }
     }
 
-    fn last(&mut self) -> Option<&Node> {
-        self.tree.last_node()
+    fn last(&mut self) -> Option<&Expr> {
+        self.expr_stack.last()
     }
 
     fn peek(&mut self) -> Option<&Token> {
@@ -276,12 +291,14 @@ impl Parser {
 
     fn end(&mut self) {
         // Drain the stack in reverse order ops were added
-        self.stack.reverse();
-        while let Some(op) = self.stack.pop() {
-            self.push(Expr::Operator { op });
+        self.op_stack.reverse();
+        while let Some(op) = self.op_stack.pop() {
+            let expr: Expr = self.expr(ExprKind::Operator { op });
+            self.push(expr);
         }
 
         // Push EOF node
-        self.push(Expr::EndOfFile { code: 0 });
+        let expr = self.expr(ExprKind::EndOfFile { code: 0 });
+        self.push(expr);
     }
 }
