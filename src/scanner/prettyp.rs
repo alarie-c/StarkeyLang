@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use crate::token::{Token, TokenKind};
+use crate::scanner::token::{Token, TokenKind};
 
 impl Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

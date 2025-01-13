@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, ops::Range};
 
-use crate::token::{Token, TokenKind};
+use crate::scanner::token::{Token, TokenKind};
 
 const WHITESPACE: &'static str = " \r\n\t";
 

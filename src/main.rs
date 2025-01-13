@@ -1,10 +1,9 @@
 use std::fs;
 
-use scanner::Scanner;
+use scanner::scanner::Scanner;
 
-mod prettyp;
 mod scanner;
-mod token;
+mod parser;
 
 const SOURCE_PATH: &str = "main.sk";
 
