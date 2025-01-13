@@ -56,14 +56,14 @@ impl Parser {
         }
 
         // Consume a token and expect an open parenthesis
-        match self.next_as(TokenKind::ParOpen) {
+        match self.next_assert(TokenKind::ParOpen) {
             Some(_) => {}
             None => panic!("Expected an open parentheses following function symbol"),
         }
 
         // Take typed expressions until we get a par close
         let mut params: Vec<Expr> = vec![];
-        while let None = self.peek_as(TokenKind::ParClose) {
+        while let None = self.peek_assert(TokenKind::ParClose) {
             // Parse this expression
             let p = self.parse_expr().unwrap_or_else(|| {
                 panic!("Expected a valid expression following open par for function params");
@@ -89,7 +89,7 @@ impl Parser {
 
         // Look for a colon token so we can determine if this function is typed or not
         let mut returns: Option<Expr> = None;
-        match self.next_as(TokenKind::Colon) {
+        match self.next_assert(TokenKind::Colon) {
             Some(_) => {
                 // Start by getting the name of the type
                 returns = Some(self.parse_expr().unwrap_or_else(|| {

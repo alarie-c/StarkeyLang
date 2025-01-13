@@ -12,6 +12,9 @@ pub(crate) struct Expr {
 
 #[derive(Debug)]
 pub(crate) enum ExprKind {
+    Operator {
+        op: Operator,
+    },
     Number {
         v: f64,
     },
@@ -32,6 +35,11 @@ pub(crate) enum ExprKind {
     FunctionCall {
         symbol: Box<Expr>,
         args: Vec<Box<Expr>>,
+    },
+    BinaryExpr {
+        lhs: Box<Expr>,
+        rhs: Box<Expr>,
+        op: Operator,
     },
 }
 
@@ -107,4 +115,73 @@ impl Parser {
             span: self.span_now(),
         }
     }
+}
+
+#[derive(Debug)]
+pub(crate) struct Operator {
+    pub op_kind: OperatorKind,
+    pub assoc: Associativity,
+    pub precedence: u8,
+}
+
+impl Operator {
+    pub(crate) fn from_token(tk: &TokenKind) -> Option<Self> {
+        match tk {
+            TokenKind::ParOpen => Some(Operator {
+                op_kind: OperatorKind::ParOpen,
+                assoc: Associativity::Right,
+                precedence: 255,
+            }),
+            TokenKind::ParClose => Some(Operator {
+                op_kind: OperatorKind::ParClose,
+                assoc: Associativity::Left,
+                precedence: 255,
+            }),
+            TokenKind::Plus => Some(Operator {
+                op_kind: OperatorKind::Plus,
+                assoc: Associativity::Left,
+                precedence: 2,
+            }),
+            TokenKind::Minus => Some(Operator {
+                op_kind: OperatorKind::Minus,
+                assoc: Associativity::Left,
+                precedence: 2,
+            }),
+            TokenKind::Star => Some(Operator {
+                op_kind: OperatorKind::Multiply,
+                assoc: Associativity::Left,
+                precedence: 3,
+            }),
+            TokenKind::Slash => Some(Operator {
+                op_kind: OperatorKind::Divide,
+                assoc: Associativity::Left,
+                precedence: 3,
+            }),
+            TokenKind::Equal => Some(Operator {
+                op_kind: OperatorKind::Assignment,
+                assoc: Associativity::Right,
+                precedence: 0,
+            }),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub(crate) enum OperatorKind {
+    Plus,
+    Minus,
+    Divide,
+    Multiply,
+    Exponent,
+    Modulo,
+    ParOpen,
+    ParClose,
+    Assignment,
+}
+
+#[derive(Debug)]
+pub(crate) enum Associativity {
+    Left,
+    Right,
 }

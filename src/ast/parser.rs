@@ -23,7 +23,7 @@ impl Parser {
         self.stream.pop()
     }
 
-    pub(in crate::ast) fn next_as(&mut self, kind: TokenKind) -> Option<Token> {
+    pub(in crate::ast) fn next_assert(&mut self, kind: TokenKind) -> Option<Token> {
         match self.stream.pop() {
             Some(tk) => {
                 if tk.kind == kind {
@@ -40,7 +40,7 @@ impl Parser {
         self.stream.last()
     }
 
-    pub(in crate::ast) fn peek_as(&mut self, kind: TokenKind) -> Option<&Token> {
+    pub(in crate::ast) fn peek_assert(&mut self, kind: TokenKind) -> Option<&Token> {
         match self.stream.last() {
             Some(tk) => {
                 if tk.kind == kind {
