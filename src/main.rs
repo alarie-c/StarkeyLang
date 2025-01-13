@@ -2,7 +2,6 @@ use std::fs;
 
 use scanner::Scanner;
 
-mod ast;
 mod scanner;
 mod token;
 
