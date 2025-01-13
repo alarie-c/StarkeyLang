@@ -9,12 +9,12 @@ pub(crate) struct Token {
 #[derive(Debug, PartialEq)]
 pub(crate) enum TokenKind {
     // Grouping symbols
-    ParOpen,
-    ParClose,
-    BracOpen,
-    BracClose,
-    CurlOpen,
-    CurlClose,
+    LPar,
+    RPar,
+    LBrac,
+    RBrac,
+    LCurl,
+    RCurl,
 
     // Mathematical operators
     Plus,
@@ -23,29 +23,30 @@ pub(crate) enum TokenKind {
     Slash,
     Modulo,
     Caret,
-    DoublePlus,
+    PlusPlus,
     PlusEqual,
-    DoubleMinus,
+    MinusMinus,
     MinusEqual,
     StarEqual,
 
     // Comparison operators
     Equal,
-    DoubleEqual,
+    EqualEqual,
     Bang,
     BangEqual,
-    LessThan,
-    LessThanEqual,
-    MoreThan,
-    MoreThanEqual,
+    Less,
+    LessEqual,
+    More,
+    MoreEqual,
     Amp, // ampsersand &
-    DoubleAmp,
+    AmpAmp,
     Bar, // pipe |
-    DoubleBar,
+    BarBar,
 
     // Other symbols
-    Arrow,
-    DoubleSlash,
+    LArrow,
+    RArrow,
+    SlashSlash,
     At,
     Hash,
     Dollar,

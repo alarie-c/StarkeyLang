@@ -43,12 +43,12 @@ impl Scanner {
             }
 
             return match self.current {
-                '(' => Some(self.token(TokenKind::ParOpen)),
-                ')' => Some(self.token(TokenKind::ParClose)),
-                '{' => Some(self.token(TokenKind::CurlOpen)),
-                '}' => Some(self.token(TokenKind::CurlClose)),
-                '[' => Some(self.token(TokenKind::BracOpen)),
-                ']' => Some(self.token(TokenKind::BracClose)),
+                '(' => Some(self.token(TokenKind::LPar)),
+                ')' => Some(self.token(TokenKind::RPar)),
+                '{' => Some(self.token(TokenKind::LCurl)),
+                '}' => Some(self.token(TokenKind::RCurl)),
+                '[' => Some(self.token(TokenKind::LBrac)),
+                ']' => Some(self.token(TokenKind::RBrac)),
                 ';' => Some(self.token(TokenKind::Semicolon)),
                 ':' => Some(self.token(TokenKind::Colon)),
                 '^' => Some(self.token(TokenKind::Caret)),
@@ -61,21 +61,21 @@ impl Scanner {
                 '.' => Some(self.token(TokenKind::Dot)),
                 '&' => {
                     if self.assert_next('&') {
-                        Some(self.token(TokenKind::DoubleAmp))
+                        Some(self.token(TokenKind::AmpAmp))
                     } else {
                         Some(self.token(TokenKind::Amp))
                     }
                 }
                 '|' => {
                     if self.assert_next('|') {
-                        Some(self.token(TokenKind::DoubleBar))
+                        Some(self.token(TokenKind::BarBar))
                     } else {
                         Some(self.token(TokenKind::Bar))
                     }
                 }
                 '+' => {
                     if self.assert_next('+') {
-                        Some(self.token(TokenKind::DoublePlus))
+                        Some(self.token(TokenKind::PlusPlus))
                     } else if self.assert_next('=') {
                         Some(self.token(TokenKind::PlusEqual))
                     } else {
@@ -84,9 +84,9 @@ impl Scanner {
                 }
                 '-' => {
                     if self.assert_next('>') {
-                        Some(self.token(TokenKind::Arrow))
+                        Some(self.token(TokenKind::RArrow))
                     } else if self.assert_next('-') {
-                        Some(self.token(TokenKind::DoubleMinus))
+                        Some(self.token(TokenKind::MinusMinus))
                     } else if self.assert_next('=') {
                         Some(self.token(TokenKind::MinusEqual))
                     } else {
@@ -102,23 +102,25 @@ impl Scanner {
                 }
                 '/' => {
                     if self.assert_next('/') {
-                        Some(self.token(TokenKind::DoubleSlash))
+                        Some(self.token(TokenKind::SlashSlash))
                     } else {
                         Some(self.token(TokenKind::Slash))
                     }
                 }
                 '<' => {
                     if self.assert_next('=') {
-                        Some(self.token(TokenKind::LessThanEqual))
+                        Some(self.token(TokenKind::LessEqual))
+                    } else if self.assert_next('-') {
+                        Some(self.token(TokenKind::LArrow))
                     } else {
-                        Some(self.token(TokenKind::LessThan))
+                        Some(self.token(TokenKind::Less))
                     }
                 }
                 '>' => {
                     if self.assert_next('=') {
-                        Some(self.token(TokenKind::MoreThanEqual))
+                        Some(self.token(TokenKind::MoreEqual))
                     } else {
-                        Some(self.token(TokenKind::MoreThan))
+                        Some(self.token(TokenKind::More))
                     }
                 }
                 '!' => {
@@ -130,7 +132,7 @@ impl Scanner {
                 }
                 '=' => {
                     if self.assert_next('=') {
-                        Some(self.token(TokenKind::DoubleEqual))
+                        Some(self.token(TokenKind::EqualEqual))
                     } else {
                         Some(self.token(TokenKind::Equal))
                     }
