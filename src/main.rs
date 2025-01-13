@@ -2,6 +2,7 @@ use std::fs;
 
 use scanner::Scanner;
 
+mod prettyp;
 mod scanner;
 mod token;
 
