@@ -47,7 +47,9 @@ impl Parser {
         None
     }
 
-    fn build_tree(&mut self, mut exprs: Vec<Expr>) -> Vec<Expr> {
+    /// This function should take a vector of expressions and ideally turn it into a tree, stemming from
+    /// one expression
+    fn build_tree(&mut self, mut exprs: Vec<Expr>) -> Expr {
         let mut tree: Vec<Expr> = vec![];
 
         // Iterate through every expr and construct a tree
@@ -59,7 +61,7 @@ impl Parser {
             _ => tree.push(e),
         });
 
-        return tree;
+        return tree.pop().unwrap();
     }
 
     fn from_operator(&mut self, op: Operator, tree: &mut Vec<Expr>) -> Option<Expr> {
